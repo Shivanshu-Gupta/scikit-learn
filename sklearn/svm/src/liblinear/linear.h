@@ -13,12 +13,28 @@ struct feature_node
 
 struct problem
 {
-	int l, n;
+	int l, l0, l1, n, n0, n1;
+	int *pairs;
 	double *y;
 	struct feature_node **x;
+	struct feature_node **x0;
+	struct feature_node **x1;
+	int concat;
+	int *perm;
 	double bias;            /* < 0 if no bias term */
+	double full0;
 	double *sample_weight;
 };
+
+//struct problem_parabel
+//{
+//	int l, n;
+//	double *y;
+//	struct feature_node **x0;
+//	struct feature_node **x1;
+//	double bias;            /* < 0 if no bias term */
+//	double *sample_weight;
+//};
 
 enum { L2R_LR, L2R_L2LOSS_SVC_DUAL, L2R_L2LOSS_SVC, L2R_L1LOSS_SVC_DUAL, MCSVM_CS, L1R_L2LOSS_SVC, L1R_LR, L2R_LR_DUAL, L2R_L2LOSS_SVR = 11, L2R_L2LOSS_SVR_DUAL, L2R_L1LOSS_SVR_DUAL }; /* solver_type */
 

@@ -139,11 +139,10 @@ struct problem * set_problem(char *X,char *Y, npy_intp *dims, double bias, char*
     }
 
     problem->y = (double *) Y;
-    problem->sample_weight = (double *) sample_weight;
     problem->x = dense_to_sparse((double *) X, dims, bias);
     problem->bias = bias;
-    problem->sample_weight = sample_weight;
-    if (problem->x == NULL) { 
+    problem->sample_weight = (double *) sample_weight;
+    if (problem->x == NULL) {
         free(problem);
         return NULL;
     }
@@ -152,14 +151,13 @@ struct problem * set_problem(char *X,char *Y, npy_intp *dims, double bias, char*
 }
 
 struct problem * csr_set_problem (char *values, npy_intp *n_indices,
-	char *indices, npy_intp *n_indptr, char *indptr, char *Y,
-        npy_intp n_features, double bias, char *sample_weight) {
+                                  char *indices, npy_intp *n_indptr, char *indptr, char *Y,
+                                  npy_intp n_features, double bias, char *sample_weight) {
 
     struct problem *problem;
     problem = malloc (sizeof (struct problem));
     if (problem == NULL) return NULL;
     problem->l = (int) n_indptr[0] -1;
-    problem->sample_weight = (double *) sample_weight;
 
     if (bias > 0){
         problem->n = (int) n_features + 1;
@@ -169,9 +167,9 @@ struct problem * csr_set_problem (char *values, npy_intp *n_indices,
 
     problem->y = (double *) Y;
     problem->x = csr_to_sparse((double *) values, n_indices, (int *) indices,
-			n_indptr, (int *) indptr, bias, n_features);
+                               n_indptr, (int *) indptr, bias, n_features);
     problem->bias = bias;
-    problem->sample_weight = sample_weight;
+    problem->sample_weight = (double *) sample_weight;
 
     if (problem->x == NULL) {
         free(problem);
@@ -181,6 +179,215 @@ struct problem * csr_set_problem (char *values, npy_intp *n_indices,
     return problem;
 }
 
+void set_feature_matrix(char *X, npy_intp *dims, double bias,
+                        struct feature_node ***x, int *l, int *n) {
+    *l = (int) dims[0];
+    *n = (int) dims[1];
+    if(bias > 0) *n += 1;
+    *x = dense_to_sparse((double *) X, dims, bias);
+}
+
+void csr_set_feature_matrix(char *values, npy_intp *n_indices, char *indices,
+        npy_intp *n_indptr, char *indptr, double bias, npy_intp n_features,
+        struct feature_node ***x, int *l, int *n) {
+	*l = (int) n_indptr[0] -1;
+	*n = (int) n_features;
+	if(bias > 0) *n += 1;
+    *x = csr_to_sparse((double *) values, n_indices, (int *) indices,
+            n_indptr, (int *) indptr, bias, n_features);
+}
+
+struct problem * dense_dense_set_problem_parabel(char *X0, char *X1,
+        npy_intp n_samples, char *Y, npy_intp *dims0, npy_intp *dims1,
+        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+    int DEBUG = 0;
+    if(DEBUG) printf("dense X0, dense X1\n");
+    struct problem *problem;
+    /* not performant but simple */
+    problem = malloc(sizeof(struct problem));
+    if (problem == NULL) return NULL;
+    problem->l = n_samples;
+    if (concat) {
+        problem->n = (int) dims0[1] + (int) dims1[1];
+        if(bias > 0) problem->n += 1;
+    } else {
+        problem->n = (int) dims0[1] * (int) dims1[1];
+        // TODO: incorporate bias explicitly inside.
+    }
+    problem->x = NULL;
+    // bias added only to x1
+    set_feature_matrix(X0, dims0, 0, &(problem->x0), &(problem->l0), &(problem->n0));
+    set_feature_matrix(X1, dims1, bias, &(problem->x1), &(problem->l1), &(problem->n1));
+    if(DEBUG) {
+        fprintf(stdout, "l=%d, l0=%d, l1=%d\n", problem->l, problem->l0, problem->l1);
+        fprintf(stdout, "n=%d, n0=%d, n1=%d\n", problem->n, problem->n0, problem->n1);
+        fflush(stdout);
+    }
+
+    problem->y = (double *) Y;
+    problem->pairs = (int *) pairs;
+
+    problem->bias = bias;
+    problem->concat = concat;
+    problem->full0 = full0;
+
+    problem->sample_weight = (double *) sample_weight;
+
+    if (problem->x0 == NULL || problem->x1 == NULL) {
+        free(problem);
+        return NULL;
+    }
+
+    return problem;
+}
+
+struct problem * csr_dense_set_problem_parabel(
+        char *values0, npy_intp *n_indices0, char *indices0, npy_intp *n_indptr0, char *indptr0,
+        char *X1,
+        npy_intp n_samples, char *Y,
+        npy_intp n_features0, npy_intp *dims1,
+        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+
+    int DEBUG = 0;
+    if(DEBUG) printf("sparse X0, dense X1\n");
+    struct problem *problem;
+    /* not performant but simple */
+    problem = malloc(sizeof(struct problem));
+    if (problem == NULL) return NULL;
+    problem->l = n_samples;
+    if (concat) {
+        problem->n = (int) n_features0 + (int) dims1[1];
+        if(bias > 0) problem->n += 1;
+    } else {
+        problem->n = (int) n_features0 * (int) dims1[1];
+        // TODO: incorporate bias explicitly inside.
+    }
+
+    problem->x = NULL;
+    // bias added only to x1
+    csr_set_feature_matrix(values0, n_indices0, indices0, n_indptr0, indptr0, 0, n_features0,
+                           &(problem->x0), &(problem->l0), &(problem->n0));
+    set_feature_matrix(X1, dims1, bias, &(problem->x1), &(problem->l1), &(problem->n1));
+    if(DEBUG) {
+        fprintf(stdout, "l=%d, l0=%d, l1=%d\n", problem->l, problem->l0, problem->l1);
+        fprintf(stdout, "n=%d, n0=%d, n1=%d\n", problem->n, problem->n0, problem->n1);
+        fflush(stdout);
+    }
+
+    problem->y = (double *) Y;
+    problem->pairs = (int *) pairs;
+
+    problem->bias = bias;
+    problem->concat = concat;
+    problem->full0 = full0;
+
+    problem->sample_weight = (double *) sample_weight;
+
+    if (problem->x0 == NULL || problem->x1 == NULL) {
+        free(problem);
+        return NULL;
+    }
+
+    return problem;
+}
+
+struct problem * dense_csr_set_problem_parabel(
+        char *X0,
+        char *values1, npy_intp *n_indices1, char *indices1, npy_intp *n_indptr1, char *indptr1,
+        npy_intp n_samples, char *Y,
+        npy_intp *dims0, npy_intp n_features1,
+        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+
+    int DEBUG = 0;
+    if(DEBUG) printf("sparse X0, dense X1\n");
+    struct problem *problem;
+    /* not performant but simple */
+    problem = malloc(sizeof(struct problem));
+    if (problem == NULL) return NULL;
+    problem->l = n_samples;
+    if (concat) {
+        problem->n = (int) dims0[1] + (int) n_features1;
+        if(bias > 0) problem->n += 1;
+    } else {
+        problem->n = (int) dims0[1] * (int) n_features1;
+        // TODO: incorporate bias explicitly inside.
+    }
+
+    problem->x = NULL;
+    // bias added only to x1
+    set_feature_matrix(X0, dims0, 0, &(problem->x0), &(problem->l0), &(problem->n0));
+    csr_set_feature_matrix(values1, n_indices1, indices1, n_indptr1, indptr1, bias, n_features1,
+                           &(problem->x1), &(problem->l1), &(problem->n1));
+    if(DEBUG) {
+        fprintf(stdout, "l=%d, l0=%d, l1=%d\n", problem->l, problem->l0, problem->l1);
+        fprintf(stdout, "n=%d, n0=%d, n1=%d\n", problem->n, problem->n0, problem->n1);
+        fflush(stdout);
+    }
+
+    problem->y = (double *) Y;
+    problem->pairs = (int *) pairs;
+
+    problem->bias = bias;
+    problem->concat = concat;
+    problem->full0 = full0;
+
+    problem->sample_weight = (double *) sample_weight;
+
+    if (problem->x0 == NULL || problem->x1 == NULL) {
+        free(problem);
+        return NULL;
+    }
+
+    return problem;
+}
+
+struct problem * csr_csr_set_problem_parabel (char *values0, npy_intp *n_indices0,
+        char *indices0, npy_intp *n_indptr0, char *indptr0, char *values1,
+        npy_intp *n_indices1, char *indices1, npy_intp *n_indptr1, char *indptr1,
+        npy_intp n_samples, char *Y, npy_intp n_features0, npy_intp n_features1,
+        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+
+    int DEBUG = 0;
+    if(DEBUG) printf("sparse X0, sparse X1\n");
+    struct problem *problem;
+    problem = malloc (sizeof (struct problem));
+    if (problem == NULL) return NULL;
+    problem->l = n_samples;
+    if (concat) {
+        problem->n = (int) n_features0 + (int) n_features1;
+        if(bias > 0) problem->n += 1;
+    } else {
+        problem->n = (int) n_features0 * (int) n_features1;
+        // TODO: incorporate bias explicitly inside.
+    }
+    problem->x = NULL;
+    // bias feature added only to x1
+    csr_set_feature_matrix(values0, n_indices0, indices0, n_indptr0, indptr0, 0, n_features0,
+                           &(problem->x0), &(problem->l0), &(problem->n0));
+    csr_set_feature_matrix(values1, n_indices1, indices1, n_indptr1, indptr1, bias, n_features1,
+                           &(problem->x1), &(problem->l1), &(problem->n1));
+    if(DEBUG) {
+        fprintf(stdout, "l=%d, l0=%d, l1=%d\n", problem->l, problem->l0, problem->l1);
+        fprintf(stdout, "n=%d, n0=%d, n1=%d\n", problem->n, problem->n0, problem->n1);
+        fflush(stdout);
+    }
+
+    problem->y = (double *) Y;
+    problem->pairs = (int *) pairs;
+
+    problem->bias = bias;
+    problem->concat = concat;
+    problem->full0 = full0;
+
+    problem->sample_weight = (double *) sample_weight;
+
+    if (problem->x0 == NULL || problem->x1 == NULL) {
+        free(problem);
+        return NULL;
+    }
+
+    return problem;
+}
 
 /* Create a paramater struct with and return it */
 struct parameter *set_parameter(int solver_type, double eps, double C,
@@ -191,7 +398,6 @@ struct parameter *set_parameter(int solver_type, double eps, double C,
     struct parameter *param = malloc(sizeof(struct parameter));
     if (param == NULL)
         return NULL;
-
     srand(seed);
     param->solver_type = solver_type;
     param->eps = eps;
@@ -217,8 +423,16 @@ double get_bias(struct model *model)
 void free_problem(struct problem *problem)
 {
     int i;
-    for(i=problem->l-1; i>=0; --i) free(problem->x[i]);
-    free(problem->x);
+    if(problem->x != NULL) {
+        for(i=problem->l-1; i>=0; --i) free(problem->x[i]);
+        free(problem->x);
+    } else {
+        for(i=problem->l0-1; i>=0; --i) free(problem->x0[i]);
+        free(problem->x0);
+        for(i=problem->l1-1; i>=0; --i) free(problem->x1[i]);
+        free(problem->x1);
+    }
+
     free(problem);
 }
 

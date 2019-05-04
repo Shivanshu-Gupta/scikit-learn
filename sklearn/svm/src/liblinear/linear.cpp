@@ -391,7 +391,7 @@ private:
 };
 
 l2r_l2_svr_fun::l2r_l2_svr_fun(const problem *prob, double *C, double p):
-	l2r_l2_svc_fun(prob, C)
+		l2r_l2_svc_fun(prob, C)
 {
 	this->p = p;
 }
@@ -456,19 +456,19 @@ void l2r_l2_svr_fun::grad(double *w, double *g)
 		g[i] = w[i] + 2*g[i];
 }
 
-// A coordinate descent algorithm for 
+// A coordinate descent algorithm for
 // multi-class support vector machines by Crammer and Singer
 //
 //  min_{\alpha}  0.5 \sum_m ||w_m(\alpha)||^2 + \sum_i \sum_m e^m_i alpha^m_i
 //    s.t.     \alpha^m_i <= C^m_i \forall m,i , \sum_m \alpha^m_i=0 \forall i
-// 
+//
 //  where e^m_i = 0 if y_i  = m,
 //        e^m_i = 1 if y_i != m,
-//  C^m_i = C if m  = y_i, 
-//  C^m_i = 0 if m != y_i, 
-//  and w_m(\alpha) = \sum_i \alpha^m_i x_i 
+//  C^m_i = C if m  = y_i,
+//  C^m_i = 0 if m != y_i,
+//  and w_m(\alpha) = \sum_i \alpha^m_i x_i
 //
-// Given: 
+// Given:
 // x, y, C
 // eps is the stopping tolerance
 //
@@ -481,19 +481,19 @@ void l2r_l2_svr_fun::grad(double *w, double *g)
 
 class Solver_MCSVM_CS
 {
-	public:
-		Solver_MCSVM_CS(const problem *prob, int nr_class, double *C, double eps=0.1, int max_iter=100000);
-		~Solver_MCSVM_CS();
-		int Solve(double *w);
-	private:
-		void solve_sub_problem(double A_i, int yi, double C_yi, int active_i, double *alpha_new);
-		bool be_shrunk(int i, int m, int yi, double alpha_i, double minG);
-		double *B, *C, *G;
-		int w_size, l;
-		int nr_class;
-		int max_iter;
-		double eps;
-		const problem *prob;
+public:
+	Solver_MCSVM_CS(const problem *prob, int nr_class, double *C, double eps=0.1, int max_iter=100000);
+	~Solver_MCSVM_CS();
+	int Solve(double *w);
+private:
+	void solve_sub_problem(double A_i, int yi, double C_yi, int active_i, double *alpha_new);
+	bool be_shrunk(int i, int m, int yi, double alpha_i, double minG);
+	double *B, *C, *G;
+	int w_size, l;
+	int nr_class;
+	int max_iter;
+	double eps;
+	const problem *prob;
 };
 
 Solver_MCSVM_CS::Solver_MCSVM_CS(const problem *prob, int nr_class, double *weighted_C, double eps, int max_iter)
@@ -576,7 +576,7 @@ int Solver_MCSVM_CS::Solve(double *w)
 	double eps_shrink = max(10.0*eps, 1.0); // stopping tolerance for shrinking
 	bool start_from_all = true;
 
-	// Initial alpha can be set here. Note that 
+	// Initial alpha can be set here. Note that
 	// sum_m alpha[i*nr_class+m] = 0, for all i=1,...,l-1
 	// alpha[i*nr_class+m] <= C[GETI(i)] if prob->y[i] == m
 	// alpha[i*nr_class+m] <= 0 if prob->y[i] != m
@@ -659,7 +659,7 @@ int Solver_MCSVM_CS::Solve(double *w)
 						while(active_size_i[i]>m)
 						{
 							if(!be_shrunk(i, active_size_i[i], y_index[i],
-											alpha_i[alpha_index_i[active_size_i[i]]], minG))
+										  alpha_i[alpha_index_i[active_size_i[i]]], minG))
 							{
 								swap(alpha_index_i[m], alpha_index_i[active_size_i[i]]);
 								swap(G[m], G[active_size_i[i]]);
@@ -772,14 +772,14 @@ int Solver_MCSVM_CS::Solve(double *w)
 	return iter;
 }
 
-// A coordinate descent algorithm for 
+// A coordinate descent algorithm for
 // L1-loss and L2-loss SVM dual problems
 //
 //  min_\alpha  0.5(\alpha^T (Q + D)\alpha) - e^T \alpha,
 //    s.t.      0 <= \alpha_i <= upper_bound_i,
-// 
+//
 //  where Qij = yi yj xi^T xj and
-//  D is a diagonal matrix 
+//  D is a diagonal matrix
 //
 // In L1-SVM case:
 // 		upper_bound_i = Cp if y_i = 1
@@ -790,12 +790,12 @@ int Solver_MCSVM_CS::Solve(double *w)
 // 		D_ii = 1/(2*Cp)	if y_i = 1
 // 		D_ii = 1/(2*Cn)	if y_i = -1
 //
-// Given: 
+// Given:
 // x, y, Cp, Cn
 // eps is the stopping tolerance
 //
 // solution will be put in w
-// 
+//
 // See Algorithm 3 of Hsieh et al., ICML 2008
 
 #undef GETI
@@ -803,8 +803,8 @@ int Solver_MCSVM_CS::Solve(double *w)
 // To support weights for instances, use GETI(i) (i)
 
 static int solve_l2r_l1l2_svc(
-	const problem *prob, double *w, double eps,
-	double Cp, double Cn, int solver_type, int max_iter)
+		const problem *prob, double *w, double eps,
+		double Cp, double Cn, int solver_type, int max_iter)
 {
 	int l = prob->l;
 	int w_size = prob->n;
@@ -855,17 +855,84 @@ static int solve_l2r_l1l2_svc(
 	for(i=0; i<l; i++)
 	{
 		QD[i] = diag[GETI(i)];
+		if(prob->x != NULL) {
+			feature_node *xi;
+			xi = prob->x[i];
+			while (xi->index != -1) {
+				double val = xi->value;
+				QD[i] += val*val;
+				w[xi->index-1] += y[i]*alpha[i]*val;
+				xi++;
+			}
+		} else {
+			feature_node *x0i, *x1i;
+			fflush(stdout);
+			int idx = prob->perm[i];
+			if(prob->pairs != NULL) idx = prob->pairs[idx];
+//			printf("%d:%d ", i, idx);
+//			fflush(stdout);
+			if(prob->concat) {
+//				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
+				x0i = prob->x0[idx % prob->l0];
+				while (x0i->index != -1) {
+					double val = x0i->value;
+					QD[i] += val*val;
+					int j = x0i->index - 1;
+					w[j] += y[i]*alpha[i]*val;
+					x0i++;
+				}
+//				x1i = prob->x1[idx % prob->l1];
+				x1i = prob->x1[idx / prob->l0];
+				while (x1i->index != -1) {
+					double val = x1i->value;
+					QD[i] += val*val;
+					int j = prob->n0 + (x1i->index - 1);
+					w[j] += y[i]*alpha[i]*val;
+					x1i++;
+				}
+			} else {
+//				printf("%d/%d: %d\n", i, l, idx);
+////            	printf("%d: ", prob->full0 == 1 ? idx : (idx / prob->l1));
+//            	printf("%d: ", idx % prob->l0);
+////				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
+//				x0i = prob->x0[idx % prob->l0];
+//				while (x0i->index != -1) {
+//					printf("%f ", x0i->value);
+//					x0i++;
+//				}
+//				printf("\n");
+////				printf("%d: ", idx % prob->l1);
+//				printf("%d: ", idx / prob->l0);
+////				x1i = prob->x1[idx % prob->l1];
+//				x1i = prob->x1[idx / prob->l0];
+//				while (x1i->index != -1) {
+//					printf("%f ", x1i->value);
+//					x1i++;
+//				}
+//				printf("\n");
+//				printf("\n");
 
-		feature_node *xi = prob->x[i];
-		while (xi->index != -1)
-		{
-			double val = xi->value;
-			QD[i] += val*val;
-			w[xi->index-1] += y[i]*alpha[i]*val;
-			xi++;
+//				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
+				x0i = prob->x0[idx % prob->l0];
+				while(x0i->index != -1) {
+//					x1i = prob->x1[idx % prob->l1];
+					x1i = prob->x1[idx / prob->l0];
+					while(x1i->index != -1) {
+						double val = x0i->value * x1i->value;
+						QD[i] += val*val;
+						int j = (x0i->index - 1) * prob->n1 + (x1i->index - 1);
+						w[j] += y[i]*alpha[i]*val;
+						x1i++;
+					}
+					x0i++;
+				}
+			}
 		}
 		index[i] = i;
 	}
+
+//	fprintf(stdout, "1\n");
+//	fflush(stdout);
 
 	while (iter < max_iter)
 	{
@@ -882,14 +949,51 @@ static int solve_l2r_l1l2_svc(
 		{
 			i = index[s];
 			G = 0;
-			schar yi = y[i];
+			if(prob->x != NULL) {
+				feature_node *xi = prob->x[i];
+				while (xi->index != -1) {
+					G += w[xi->index-1]*(xi->value);
+					xi++;
+				}
+			} else {
+				feature_node *x0i, *x1i;
+				int idx = prob->perm[i];
+				if(prob->pairs != NULL) idx = prob->pairs[idx];
 
-			feature_node *xi = prob->x[i];
-			while(xi->index!= -1)
-			{
-				G += w[xi->index-1]*(xi->value);
-				xi++;
+				if(prob->concat) {
+//					x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
+					x0i = prob->x0[idx % prob->l0];
+					while (x0i->index != -1) {
+						int j = x0i->index - 1;
+						G += w[j]*(x0i->value);
+						x0i++;
+					}
+//					x1i = prob->x1[idx % prob->l1];
+					x1i = prob->x1[idx / prob->l0];
+					while (x1i->index != -1) {
+						int j = prob->n0 + (x1i->index - 1);
+						G += w[j]*(x1i->value);
+						x1i++;
+					}
+				} else {
+//					x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
+					x0i = prob->x0[idx % prob->l0];
+					while(x0i->index != -1) {
+//						x1i = prob->x1[idx % prob->l1];
+						x1i = prob->x1[idx / prob->l0];
+						while(x1i->index != -1) {
+							int j = (x0i->index - 1) * prob->n1 + (x1i->index - 1);
+							G += w[j]*(x0i->value)*(x1i->value);
+							x1i++;
+						}
+						x0i++;
+					}
+				}
 			}
+//			fprintf(stdout, "2\n");
+//			fflush(stdout);
+
+			schar yi = y[i];
 			G = G*yi-1;
 
 			C = upper_bound[GETI(i)];
@@ -931,11 +1035,45 @@ static int solve_l2r_l1l2_svc(
 				double alpha_old = alpha[i];
 				alpha[i] = min(max(alpha[i] - G/QD[i], 0.0), C);
 				d = (alpha[i] - alpha_old)*yi;
-				xi = prob->x[i];
-				while (xi->index != -1)
-				{
-					w[xi->index-1] += d*xi->value;
-					xi++;
+				if(prob->x != NULL) {
+					feature_node *xi = prob->x[i];
+					while (xi->index != -1) {
+						w[xi->index-1] += d*xi->value;
+						xi++;
+					}
+				} else {
+					feature_node *x0i, *x1i;
+					int idx = prob->perm[i];
+					if(prob->pairs != NULL) idx = prob->pairs[idx];
+					if(prob->concat) {
+//						x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
+						x0i = prob->x0[idx % prob->l0];
+						while (x0i->index != -1) {
+							int j = x0i->index - 1;
+							w[j] += d * x0i->value;
+							x0i++;
+						}
+//						x1i = prob->x1[idx % prob->l1];
+						x1i = prob->x1[idx / prob->l0];
+						while (x1i->index != -1) {
+							int j = prob->n0 + (x1i->index - 1);
+							w[j] += d * x1i->value;
+							x1i++;
+						}
+					} else {
+//						x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
+						x0i = prob->x0[idx % prob->l0];
+						while(x0i->index != -1) {
+//							x1i = prob->x1[idx % prob->l1];
+							x1i = prob->x1[idx / prob->l0];
+							while(x1i->index != -1) {
+								int j = (x0i->index - 1) * prob->n1 + (x1i->index - 1);
+								w[j] += d * x0i->value * x1i->value;
+								x1i++;
+							}
+							x0i++;
+						}
+					}
 				}
 			}
 		}
@@ -964,6 +1102,8 @@ static int solve_l2r_l1l2_svc(
 		if (PGmin_old >= 0)
 			PGmin_old = -INF;
 	}
+//	fprintf(stdout, "3\n");
+//	fflush(stdout);
 
 	info("\noptimization finished, #iter = %d\n",iter);
 	if (iter >= max_iter)
@@ -992,14 +1132,14 @@ static int solve_l2r_l1l2_svc(
 }
 
 
-// A coordinate descent algorithm for 
+// A coordinate descent algorithm for
 // L1-loss and L2-loss epsilon-SVR dual problem
 //
 //  min_\beta  0.5\beta^T (Q + diag(lambda)) \beta - p \sum_{i=1}^l|\beta_i| + \sum_{i=1}^l yi\beta_i,
 //    s.t.      -upper_bound_i <= \beta_i <= upper_bound_i,
-// 
+//
 //  where Qij = xi^T xj and
-//  D is a diagonal matrix 
+//  D is a diagonal matrix
 //
 // In L1-SVM case:
 // 		upper_bound_i = C
@@ -1008,21 +1148,21 @@ static int solve_l2r_l1l2_svc(
 // 		upper_bound_i = INF
 // 		lambda_i = 1/(2*C)
 //
-// Given: 
+// Given:
 // x, y, p, C
 // eps is the stopping tolerance
 //
 // solution will be put in w
 //
-// See Algorithm 4 of Ho and Lin, 2012   
+// See Algorithm 4 of Ho and Lin, 2012
 
 #undef GETI
 #define GETI(i) (0)
 // To support weights for instances, use GETI(i) (i)
 
 static int solve_l2r_l1l2_svr(
-	const problem *prob, double *w, const parameter *param,
-	int solver_type, int max_iter)
+		const problem *prob, double *w, const parameter *param,
+		int solver_type, int max_iter)
 {
 	int l = prob->l;
 	double C = param->C;
@@ -1225,17 +1365,17 @@ static int solve_l2r_l1l2_svr(
 }
 
 
-// A coordinate descent algorithm for 
+// A coordinate descent algorithm for
 // the dual of L2-regularized logistic regression problems
 //
 //  min_\alpha  0.5(\alpha^T Q \alpha) + \sum \alpha_i log (\alpha_i) + (upper_bound_i - \alpha_i) log (upper_bound_i - \alpha_i),
 //    s.t.      0 <= \alpha_i <= upper_bound_i,
-// 
-//  where Qij = yi yj xi^T xj and 
+//
+//  where Qij = yi yj xi^T xj and
 //  upper_bound_i = Cp if y_i = 1
 //  upper_bound_i = Cn if y_i = -1
 //
-// Given: 
+// Given:
 // x, y, Cp, Cn
 // eps is the stopping tolerance
 //
@@ -1249,7 +1389,7 @@ static int solve_l2r_l1l2_svr(
 // Each instance is weighted by sample_weight*class_weight)
 
 int solve_l2r_lr_dual(const problem *prob, double *w, double eps, double Cp, double Cn,
-					   int max_iter)
+					  int max_iter)
 {
 	int l = prob->l;
 	int w_size = prob->n;
@@ -1290,13 +1430,31 @@ int solve_l2r_lr_dual(const problem *prob, double *w, double eps, double Cp, dou
 	for(i=0; i<l; i++)
 	{
 		xTx[i] = 0;
-		feature_node *xi = prob->x[i];
-		while (xi->index != -1)
-		{
-			double val = xi->value;
-			xTx[i] += val*val;
-			w[xi->index-1] += y[i]*alpha[2*i]*val;
-			xi++;
+		feature_node *xi;
+		if(prob->x != NULL) {
+			xi = prob->x[i];
+			while (xi->index != -1) {
+				double val = xi->value;
+				xTx[i] += val*val;
+				w[xi->index-1] += y[i]*alpha[2*i]*val;
+				xi++;
+			}
+		} else {
+			int *perm = prob->perm;
+			xi = prob->x0[perm[i] % prob->l0];
+			while (xi->index != -1) {
+				double val = xi->value;
+				xTx[i] += val*val;
+				w[xi->index-1] += y[i]*alpha[2*i]*val;
+				xi++;
+			}
+			xi = prob->x1[perm[i] / prob->l0];
+			while (xi->index != -1) {
+				double val = xi->value;
+				xTx[i] += val*val;
+				w[xi->index-1] += y[i]*alpha[2*i]*val;
+				xi++;
+			}
 		}
 		index[i] = i;
 	}
@@ -1316,12 +1474,27 @@ int solve_l2r_lr_dual(const problem *prob, double *w, double eps, double Cp, dou
 			schar yi = y[i];
 			double C = SAMPLE_WEIGHT(i);
 			double ywTx = 0, xisq = xTx[i];
-			feature_node *xi = prob->x[i];
-			while (xi->index != -1)
-			{
-				ywTx += w[xi->index-1]*xi->value;
-				xi++;
+			feature_node *xi;
+			if(prob->x != NULL) {
+				xi = prob->x[i];
+				while (xi->index != -1) {
+					ywTx += w[xi->index-1]*xi->value;
+					xi++;
+				}
+			} else {
+				int *perm = prob->perm;
+				xi = prob->x0[perm[i] % prob->l0];
+				while (xi->index != -1) {
+					ywTx += w[xi->index-1]*xi->value;
+					xi++;
+				}
+				xi = prob->x1[perm[i] / prob->l0];
+				while (xi->index != -1) {
+					ywTx += w[xi->index-1]*xi->value;
+					xi++;
+				}
 			}
+
 			ywTx *= y[i];
 			double a = xisq, b = ywTx;
 
@@ -1364,11 +1537,24 @@ int solve_l2r_lr_dual(const problem *prob, double *w, double eps, double Cp, dou
 			{
 				alpha[ind1] = z;
 				alpha[ind2] = C-z;
-				xi = prob->x[i];
-				while (xi->index != -1)
-				{
-					w[xi->index-1] += sign*(z-alpha_old)*yi*xi->value;
-					xi++;
+				if(prob->x != NULL) {
+					xi = prob->x[i];
+					while (xi->index != -1) {
+						w[xi->index-1] += sign*(z-alpha_old)*yi*xi->value;
+						xi++;
+					}
+				} else {
+					int *perm = prob->perm;
+					xi = prob->x0[perm[i] % prob->l0];
+					while (xi->index != -1) {
+						w[xi->index-1] += sign*(z-alpha_old)*yi*xi->value;
+						xi++;
+					}
+					xi = prob->x1[perm[i] / prob->l0];
+					while (xi->index != -1) {
+						w[xi->index-1] += sign*(z-alpha_old)*yi*xi->value;
+						xi++;
+					}
 				}
 			}
 		}
@@ -1397,7 +1583,7 @@ int solve_l2r_lr_dual(const problem *prob, double *w, double eps, double Cp, dou
 	v *= 0.5;
 	for(i=0; i<l; i++)
 		v += alpha[2*i] * log(alpha[2*i]) + alpha[2*i+1] * log(alpha[2*i+1])
-			- SAMPLE_WEIGHT(i) * log(SAMPLE_WEIGHT(i));
+			 - SAMPLE_WEIGHT(i) * log(SAMPLE_WEIGHT(i));
 	info("Objective value = %lf\n", v);
 
 	delete [] xTx;
@@ -1425,8 +1611,8 @@ int solve_l2r_lr_dual(const problem *prob, double *w, double eps, double Cp, dou
 // To support weights for instances, use GETI(i) (i)
 
 static int solve_l1r_l2_svc(
-	problem *prob_col, double *w, double eps,
-	double Cp, double Cn, int max_iter)
+		problem *prob_col, double *w, double eps,
+		double Cp, double Cn, int max_iter)
 {
 	int l = prob_col->l;
 	int w_size = prob_col->n;
@@ -1712,8 +1898,8 @@ static int solve_l1r_l2_svc(
 // Each instance is weighted by (class_weight*sample_weight)
 
 static int solve_l1r_lr(
-	const problem *prob_col, double *w, double eps,
-	double Cp, double Cn, int max_newton_iter)
+		const problem *prob_col, double *w, double eps,
+		double Cp, double Cn, int max_newton_iter)
 {
 	int l = prob_col->l;
 	int w_size = prob_col->n;
@@ -1823,7 +2009,7 @@ static int solve_l1r_lr(
 					violation = -Gp;
 				else if(Gn > 0)
 					violation = Gn;
-				//outer-level shrinking
+					//outer-level shrinking
 				else if(Gp>Gmax_old/l && Gn<-Gmax_old/l)
 				{
 					active_size--;
@@ -1889,7 +2075,7 @@ static int solve_l1r_lr(
 						violation = -Gp;
 					else if(Gn > 0)
 						violation = Gn;
-					//inner-level shrinking
+						//inner-level shrinking
 					else if(Gp>QP_Gmax_old/l && Gn<-QP_Gmax_old/l)
 					{
 						QP_active_size--;
@@ -1936,7 +2122,7 @@ static int solve_l1r_lr(
 				//inner stopping
 				if(QP_active_size == active_size)
 					break;
-				//active set reactivation
+					//active set reactivation
 				else
 				{
 					QP_active_size = active_size;
@@ -2172,37 +2358,37 @@ static void group_classes(const problem *prob, int *nr_class_ret, int **label_re
 		}
 	}
 
-        /* START MOD: Sort labels and apply to array count --dyamins */
+	/* START MOD: Sort labels and apply to array count --dyamins */
 
-        int j;
-        for (j=1; j<nr_class; j++)
-        {
-                i = j-1;
-                int this_label = label[j];
-                int this_count = count[j];
-                while(i>=0 && label[i] > this_label)
-                {
-                        label[i+1] = label[i];
-                        count[i+1] = count[i];
-                        i--;
-                }
-                label[i+1] = this_label;
-                count[i+1] = this_count;
-        }
-        
-        for (i=0; i <l; i++)
-        {
-                j = 0;
-                int this_label = (int)prob->y[i];
-                while(this_label != label[j])
-                {
-                        j++;      
-                }
-                data_label[i] = j;
+	int j;
+	for (j=1; j<nr_class; j++)
+	{
+		i = j-1;
+		int this_label = label[j];
+		int this_count = count[j];
+		while(i>=0 && label[i] > this_label)
+		{
+			label[i+1] = label[i];
+			count[i+1] = count[i];
+			i--;
+		}
+		label[i+1] = this_label;
+		count[i+1] = this_count;
+	}
 
-        }
+	for (i=0; i <l; i++)
+	{
+		j = 0;
+		int this_label = (int)prob->y[i];
+		while(this_label != label[j])
+		{
+			j++;
+		}
+		data_label[i] = j;
 
-        /* END MOD */
+	}
+
+	/* END MOD */
 
 #if 0
 	//
@@ -2363,6 +2549,7 @@ static int train_one(const problem *prob, const parameter *param, double *w, dou
 //
 model* train(const problem *prob, const parameter *param)
 {
+	int DEBUG = 0;
 	int i,j;
 	int l = prob->l;
 	int n = prob->n;
@@ -2417,24 +2604,98 @@ model* train(const problem *prob, const parameter *param)
 		}
 
 		// constructing the subproblem
-		feature_node **x = Malloc(feature_node *,l);
-		double *sample_weight = new double[l];
-		for(i=0;i<l;i++)
-		{
-			x[i] = prob->x[perm[i]];
-			sample_weight[i] = prob->sample_weight[perm[i]];
-		}
-
-		int k;
 		problem sub_prob;
-		sub_prob.l = l;
-		sub_prob.n = n;
-		sub_prob.x = Malloc(feature_node *,sub_prob.l);
-		sub_prob.y = Malloc(double,sub_prob.l);
-		sub_prob.sample_weight = sample_weight;
+		double *sample_weight;
+		feature_node **x;
+		int k;
+		// TODO: decide whether to keep this
+		bool no_create_sub_prob = (nr_class == 2 && (param->solver_type == L2R_L2LOSS_SVC_DUAL
+													 || param->solver_type == L2R_LR_DUAL));
+		no_create_sub_prob = false;
+		if(no_create_sub_prob) {
+			sub_prob = *prob;
+			sub_prob.y = Malloc(double,sub_prob.l);
+			sample_weight = new double[l];
+			for(i=0;i<l;i++) sample_weight[i] = prob->sample_weight[perm[i]];
+			sub_prob.sample_weight = sample_weight;
+			if(prob->x == NULL) sub_prob.perm = perm;
+		} else {
+			if(prob->x != NULL) {
+				x = Malloc(feature_node *,l);
+				sample_weight = new double[l];
+				for(i=0;i<l;i++)
+				{
+					x[i] = prob->x[perm[i]];
+					sample_weight[i] = prob->sample_weight[perm[i]];
+				}
 
-		for(k=0; k<sub_prob.l; k++)
-			sub_prob.x[k] = x[k];
+				sub_prob.l = l;
+				sub_prob.n = n;
+				sub_prob.x = Malloc(feature_node *,sub_prob.l);
+				sub_prob.y = Malloc(double,sub_prob.l);
+				sub_prob.sample_weight = sample_weight;
+
+				for(k=0; k<sub_prob.l; k++) sub_prob.x[k] = x[k];
+			} else {
+				sample_weight = new double[l];
+				for(i=0;i<l;i++) sample_weight[i] = prob->sample_weight[perm[i]];
+
+				sub_prob.l = l;
+				sub_prob.l0 = prob->l0;
+//				sub_prob.l1 = prob->l1;
+				sub_prob.l1 = prob->l1;
+				sub_prob.n = n;
+				sub_prob.n0 = prob->n0;
+				sub_prob.n1 = prob->n1;
+				if(DEBUG){
+					fprintf(stdout, "l=%d, l0=%d, l1=%d\n", sub_prob.l, sub_prob.l0, sub_prob.l1);
+					fprintf(stdout, "n=%d, n0=%d, n1=%d\n", sub_prob.n, sub_prob.n0, sub_prob.n1);
+					fflush(stdout);
+				}
+				sub_prob.y = Malloc(double,sub_prob.l);
+				if(prob->pairs == NULL) sub_prob.pairs = NULL;
+				else {
+					sub_prob.pairs = Malloc(int, sub_prob.l);
+					for(int i = 0; i < l; i++) sub_prob.pairs[i] = prob->pairs[i];
+				}
+				sub_prob.x = NULL;
+				sub_prob.x0 = Malloc(feature_node *,sub_prob.l0);
+				for(k=0; k<sub_prob.l0; k++) {
+					sub_prob.x0[k] = prob->x0[k];
+					if(DEBUG) printf("%d/%d: \n", k, prob->l0);
+					feature_node *x0k = prob->x0[k];
+					if(DEBUG) {
+						while (x0k->index != -1) {
+							printf("%f ", x0k->value);
+							x0k++;
+						}
+						printf("\n");
+					}
+				}
+
+				sub_prob.x1 = Malloc(feature_node *,sub_prob.l1);
+				for(k=0; k<sub_prob.l1; k++) {
+					sub_prob.x1[k] = prob->x1[k];
+					if(DEBUG) printf("%d/%d: \n", k, prob->l1);
+					feature_node *x1k = prob->x1[k];
+					if(DEBUG) {
+						while (x1k->index != -1) {
+							printf("%f ", x1k->value);
+							x1k++;
+						}
+						printf("\n");
+					}
+				}
+
+				sub_prob.concat = prob->concat;
+				sub_prob.sample_weight = sample_weight;
+				sub_prob.perm = perm;
+			}
+		}
+		if(DEBUG) {
+			printf("subprob created\n");
+			fflush(stdout);
+		}
 
 		// multi-class svm by Crammer and Singer
 		if(param->solver_type == MCSVM_CS)
@@ -2459,7 +2720,10 @@ model* train(const problem *prob, const parameter *param)
 					sub_prob.y[k] = -1;
 				for(; k<sub_prob.l; k++)
 					sub_prob.y[k] = +1;
-
+				if(DEBUG) {
+					fprintf(stdout, "going in\n");
+					fflush(stdout);
+				}
 				model_->n_iter[0]=train_one(&sub_prob, param, &model_->w[0], weighted_C[1], weighted_C[0]);
 			}
 			else
@@ -2490,12 +2754,19 @@ model* train(const problem *prob, const parameter *param)
 
 		}
 
-		free(x);
 		free(label);
 		free(start);
 		free(count);
 		free(perm);
-		free(sub_prob.x);
+		if(!no_create_sub_prob) {
+			if(prob->x != NULL) {
+				free(x);
+				free(sub_prob.x);
+			} else {
+				free(sub_prob.x0);
+				free(sub_prob.x1);
+			}
+		}
 		free(sub_prob.y);
 		free(weighted_C);
 		delete[] sample_weight;
@@ -2845,14 +3116,14 @@ void get_labels(const model *model_, int* label)
 
 void get_n_iter(const model *model_, int* n_iter)
 {
-    int labels;
-    labels = model_->nr_class;
-    if (labels == 2)
-        labels = 1;
+	int labels;
+	labels = model_->nr_class;
+	if (labels == 2)
+		labels = 1;
 
-    if (model_->n_iter != NULL)
-        for(int i=0;i<labels;i++)
-            n_iter[i] = model_->n_iter[i];
+	if (model_->n_iter != NULL)
+		for(int i=0;i<labels;i++)
+			n_iter[i] = model_->n_iter[i];
 }
 
 #if 0
@@ -2911,7 +3182,7 @@ void free_model_content(struct model *model_ptr)
 	if(model_ptr->label != NULL)
 		free(model_ptr->label);
 	if(model_ptr->n_iter != NULL)
-	    free(model_ptr->n_iter);
+		free(model_ptr->n_iter);
 }
 
 void free_and_destroy_model(struct model **model_ptr_ptr)
@@ -2944,16 +3215,16 @@ const char *check_parameter(const problem *prob, const parameter *param)
 		return "p < 0";
 
 	if(param->solver_type != L2R_LR
-		&& param->solver_type != L2R_L2LOSS_SVC_DUAL
-		&& param->solver_type != L2R_L2LOSS_SVC
-		&& param->solver_type != L2R_L1LOSS_SVC_DUAL
-		&& param->solver_type != MCSVM_CS
-		&& param->solver_type != L1R_L2LOSS_SVC
-		&& param->solver_type != L1R_LR
-		&& param->solver_type != L2R_LR_DUAL
-		&& param->solver_type != L2R_L2LOSS_SVR
-		&& param->solver_type != L2R_L2LOSS_SVR_DUAL
-		&& param->solver_type != L2R_L1LOSS_SVR_DUAL)
+	   && param->solver_type != L2R_L2LOSS_SVC_DUAL
+	   && param->solver_type != L2R_L2LOSS_SVC
+	   && param->solver_type != L2R_L1LOSS_SVC_DUAL
+	   && param->solver_type != MCSVM_CS
+	   && param->solver_type != L1R_L2LOSS_SVC
+	   && param->solver_type != L1R_LR
+	   && param->solver_type != L2R_LR_DUAL
+	   && param->solver_type != L2R_L2LOSS_SVR
+	   && param->solver_type != L2R_L2LOSS_SVR_DUAL
+	   && param->solver_type != L2R_L1LOSS_SVR_DUAL)
 		return "unknown solver type";
 
 	return NULL;
