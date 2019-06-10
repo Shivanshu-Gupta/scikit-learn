@@ -96,13 +96,13 @@ def train_wrap_parabel(X0, X1, np.ndarray[np.float64_t, ndim=1, mode='c'] Y,
     cdef char_const_ptr error_msg
     cdef int len_w
 
-    # cdef np.ndarray[np.int32_t,   ndim=1, mode='c'] cpairs
+    # cdef np.ndarray[np.uint64_t,   ndim=1, mode='c'] cpairs
     cdef char *cpairs
 
     if pairs is None:
         cpairs = NULL
     else:
-        cpairs = (<np.ndarray[np.int32_t,   ndim=1, mode='c']>pairs).data
+        cpairs = (<np.ndarray[np.uint64_t,   ndim=1, mode='c']>pairs).data
     if is_sparse0 and is_sparse1:
         # print("here")
         problem = csr_csr_set_problem_parabel(

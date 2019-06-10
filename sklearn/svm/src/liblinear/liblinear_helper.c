@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <numpy/arrayobject.h>
 #include "linear.h"
 
@@ -225,7 +226,7 @@ struct problem * dense_dense_set_problem_parabel(char *X0, char *X1,
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (int *) pairs;
+    problem->pairs = (uint64_t *) pairs;
 
     problem->bias = bias;
     problem->concat = concat;
@@ -275,7 +276,7 @@ struct problem * csr_dense_set_problem_parabel(
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (int *) pairs;
+    problem->pairs = (uint64_t *) pairs;
 
     problem->bias = bias;
     problem->concat = concat;
@@ -325,7 +326,7 @@ struct problem * dense_csr_set_problem_parabel(
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (int *) pairs;
+    problem->pairs = (uint64_t *) pairs;
 
     problem->bias = bias;
     problem->concat = concat;
@@ -373,7 +374,7 @@ struct problem * csr_csr_set_problem_parabel (char *values0, npy_intp *n_indices
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (int *) pairs;
+    problem->pairs = (uint64_t *) pairs;
 
     problem->bias = bias;
     problem->concat = concat;

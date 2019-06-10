@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 struct feature_node
 {
 	int index;
@@ -14,7 +16,8 @@ struct feature_node
 struct problem
 {
 	int l, l0, l1, n, n0, n1;
-	int *pairs;
+//	int *pairs;
+	uint64_t *pairs;
 	double *y;
 	struct feature_node **x;
 	struct feature_node **x0;

@@ -1082,7 +1082,7 @@ def _fit_liblinear_parabel(X0, X1, y, C, fit_intercept, intercept_scaling,
     y_ind = np.asarray(y_ind, dtype=np.float64).ravel()
     y_ind = np.require(y_ind, requirements="W")
     if pairs is not None:
-        pairs = pairs.astype(np.int32).ravel()
+        pairs = pairs.astype(np.uint64).ravel()
     if sample_weight is None:
         # if pairs is None:
         #     sample_weight = np.ones(X0.shape[0] * X1.shape[0])

@@ -867,7 +867,7 @@ static int solve_l2r_l1l2_svc(
 		} else {
 			feature_node *x0i, *x1i;
 			fflush(stdout);
-			int idx = prob->perm[i];
+			uint64_t idx = prob->perm[i];
 			if(prob->pairs != NULL) idx = prob->pairs[idx];
 //			printf("%d:%d ", i, idx);
 //			fflush(stdout);
@@ -957,7 +957,7 @@ static int solve_l2r_l1l2_svc(
 				}
 			} else {
 				feature_node *x0i, *x1i;
-				int idx = prob->perm[i];
+				uint64_t idx = prob->perm[i];
 				if(prob->pairs != NULL) idx = prob->pairs[idx];
 
 				if(prob->concat) {
@@ -1043,7 +1043,7 @@ static int solve_l2r_l1l2_svc(
 					}
 				} else {
 					feature_node *x0i, *x1i;
-					int idx = prob->perm[i];
+					uint64_t idx = prob->perm[i];
 					if(prob->pairs != NULL) idx = prob->pairs[idx];
 					if(prob->concat) {
 //						x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
@@ -2655,7 +2655,7 @@ model* train(const problem *prob, const parameter *param)
 				sub_prob.y = Malloc(double,sub_prob.l);
 				if(prob->pairs == NULL) sub_prob.pairs = NULL;
 				else {
-					sub_prob.pairs = Malloc(int, sub_prob.l);
+					sub_prob.pairs = Malloc(uint64_t , sub_prob.l);
 					for(int i = 0; i < l; i++) sub_prob.pairs[i] = prob->pairs[i];
 				}
 				sub_prob.x = NULL;
