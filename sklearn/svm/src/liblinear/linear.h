@@ -17,7 +17,9 @@ struct problem
 {
 	int l, l0, l1, n, n0, n1;
 //	int *pairs;
-	uint64_t *pairs;
+//	uint64_t *pairs;
+    int *iX0;
+    int *iX1;
 	double *y;
 	struct feature_node **x;
 	struct feature_node **x0;

@@ -867,13 +867,15 @@ static int solve_l2r_l1l2_svc(
 		} else {
 			feature_node *x0i, *x1i;
 			fflush(stdout);
-			uint64_t idx = prob->perm[i];
-			if(prob->pairs != NULL) idx = prob->pairs[idx];
+			int idx = prob->perm[i];
+//			if(prob->pairs != NULL) idx = prob->pairs[idx];
+//			int iX0 = prob->iX0[idx], iX1 = prob->iX1[idx];
 //			printf("%d:%d ", i, idx);
 //			fflush(stdout);
 			if(prob->concat) {
 //				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
-				x0i = prob->x0[idx % prob->l0];
+//				x0i = prob->x0[idx % prob->l0];
+				x0i = prob->x0[prob->iX0[idx]];
 				while (x0i->index != -1) {
 					double val = x0i->value;
 					QD[i] += val*val;
@@ -882,7 +884,8 @@ static int solve_l2r_l1l2_svc(
 					x0i++;
 				}
 //				x1i = prob->x1[idx % prob->l1];
-				x1i = prob->x1[idx / prob->l0];
+//				x1i = prob->x1[idx / prob->l0];
+				x1i = prob->x1[prob->iX1[idx]];
 				while (x1i->index != -1) {
 					double val = x1i->value;
 					QD[i] += val*val;
@@ -893,18 +896,22 @@ static int solve_l2r_l1l2_svc(
 			} else {
 //				printf("%d/%d: %d\n", i, l, idx);
 ////            	printf("%d: ", prob->full0 == 1 ? idx : (idx / prob->l1));
-//            	printf("%d: ", idx % prob->l0);
+////            	printf("%d: ", idx % prob->l0);
+//            	printf("%d: ", prob->iX0[idx);
 ////				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
-//				x0i = prob->x0[idx % prob->l0];
+////				x0i = prob->x0[idx % prob->l0];
+//				x0i = prob->x0[prob->iX0[idx];
 //				while (x0i->index != -1) {
 //					printf("%f ", x0i->value);
 //					x0i++;
 //				}
 //				printf("\n");
 ////				printf("%d: ", idx % prob->l1);
-//				printf("%d: ", idx / prob->l0);
+////				printf("%d: ", idx / prob->l0);
+//				printf("%d: ", prob->iX1[idx);
 ////				x1i = prob->x1[idx % prob->l1];
-//				x1i = prob->x1[idx / prob->l0];
+////				x1i = prob->x1[idx / prob->l0];
+//				x1i = prob->x1[prob->iX1[idx];
 //				while (x1i->index != -1) {
 //					printf("%f ", x1i->value);
 //					x1i++;
@@ -912,11 +919,19 @@ static int solve_l2r_l1l2_svc(
 //				printf("\n");
 //				printf("\n");
 
+//				if(prob->pairs[idx] % prob->l0 != prob->iX0[idx] ||
+//				prob->pairs[idx] / prob->l0 != prob->iX1[idx]) {
+//					printf("%d %d %d %d\n", idx, prob->pairs[idx], prob->iX0[idx], prob->iX1[idx]);
+//				}
+
 //				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
-				x0i = prob->x0[idx % prob->l0];
+//				x0i = prob->x0[idx % prob->l0];
+
+				x0i = prob->x0[prob->iX0[idx]];
 				while(x0i->index != -1) {
 //					x1i = prob->x1[idx % prob->l1];
-					x1i = prob->x1[idx / prob->l0];
+//					x1i = prob->x1[idx / prob->l0];
+					x1i = prob->x1[prob->iX1[idx]];
 					while(x1i->index != -1) {
 						double val = x0i->value * x1i->value;
 						QD[i] += val*val;
@@ -957,19 +972,22 @@ static int solve_l2r_l1l2_svc(
 				}
 			} else {
 				feature_node *x0i, *x1i;
-				uint64_t idx = prob->perm[i];
-				if(prob->pairs != NULL) idx = prob->pairs[idx];
+				int idx = prob->perm[i];
+//				uint64_t idx = prob->perm[i];
+//				if(prob->pairs != NULL) idx = prob->pairs[idx];
 
 				if(prob->concat) {
 //					x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
-					x0i = prob->x0[idx % prob->l0];
+//					x0i = prob->x0[idx % prob->l0];
+					x0i = prob->x0[prob->iX0[idx]];
 					while (x0i->index != -1) {
 						int j = x0i->index - 1;
 						G += w[j]*(x0i->value);
 						x0i++;
 					}
 //					x1i = prob->x1[idx % prob->l1];
-					x1i = prob->x1[idx / prob->l0];
+//					x1i = prob->x1[idx / prob->l0];
+					x1i = prob->x1[prob->iX1[idx]];
 					while (x1i->index != -1) {
 						int j = prob->n0 + (x1i->index - 1);
 						G += w[j]*(x1i->value);
@@ -977,10 +995,12 @@ static int solve_l2r_l1l2_svc(
 					}
 				} else {
 //					x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
-					x0i = prob->x0[idx % prob->l0];
+//					x0i = prob->x0[idx % prob->l0];
+					x0i = prob->x0[prob->iX0[idx]];
 					while(x0i->index != -1) {
 //						x1i = prob->x1[idx % prob->l1];
-						x1i = prob->x1[idx / prob->l0];
+//						x1i = prob->x1[idx / prob->l0];
+						x1i = prob->x1[prob->iX1[idx]];
 						while(x1i->index != -1) {
 							int j = (x0i->index - 1) * prob->n1 + (x1i->index - 1);
 							G += w[j]*(x0i->value)*(x1i->value);
@@ -1043,18 +1063,20 @@ static int solve_l2r_l1l2_svc(
 					}
 				} else {
 					feature_node *x0i, *x1i;
-					uint64_t idx = prob->perm[i];
-					if(prob->pairs != NULL) idx = prob->pairs[idx];
+					int idx = prob->perm[i];
+//					if(prob->pairs != NULL) idx = prob->pairs[idx];
 					if(prob->concat) {
 //						x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
-						x0i = prob->x0[idx % prob->l0];
+//						x0i = prob->x0[idx % prob->l0];
+						x0i = prob->x0[prob->iX0[idx]];
 						while (x0i->index != -1) {
 							int j = x0i->index - 1;
 							w[j] += d * x0i->value;
 							x0i++;
 						}
 //						x1i = prob->x1[idx % prob->l1];
-						x1i = prob->x1[idx / prob->l0];
+//						x1i = prob->x1[idx / prob->l0];
+						x1i = prob->x1[prob->iX1[idx]];
 						while (x1i->index != -1) {
 							int j = prob->n0 + (x1i->index - 1);
 							w[j] += d * x1i->value;
@@ -1062,10 +1084,12 @@ static int solve_l2r_l1l2_svc(
 						}
 					} else {
 //						x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
-						x0i = prob->x0[idx % prob->l0];
+//						x0i = prob->x0[idx % prob->l0];
+						x0i = prob->x0[prob->iX0[idx]];
 						while(x0i->index != -1) {
 //							x1i = prob->x1[idx % prob->l1];
-							x1i = prob->x1[idx / prob->l0];
+//							x1i = prob->x1[idx / prob->l0];
+							x1i = prob->x1[prob->iX1[idx]];
 							while(x1i->index != -1) {
 								int j = (x0i->index - 1) * prob->n1 + (x1i->index - 1);
 								w[j] += d * x0i->value * x1i->value;
@@ -2642,7 +2666,6 @@ model* train(const problem *prob, const parameter *param)
 
 				sub_prob.l = l;
 				sub_prob.l0 = prob->l0;
-//				sub_prob.l1 = prob->l1;
 				sub_prob.l1 = prob->l1;
 				sub_prob.n = n;
 				sub_prob.n0 = prob->n0;
@@ -2653,11 +2676,22 @@ model* train(const problem *prob, const parameter *param)
 					fflush(stdout);
 				}
 				sub_prob.y = Malloc(double,sub_prob.l);
-				if(prob->pairs == NULL) sub_prob.pairs = NULL;
-				else {
-					sub_prob.pairs = Malloc(uint64_t , sub_prob.l);
-					for(int i = 0; i < l; i++) sub_prob.pairs[i] = prob->pairs[i];
+				if(prob->iX0 == NULL) {
+					sub_prob.iX0 = NULL;
+					sub_prob.iX1 = NULL;
+				} else {
+					sub_prob.iX0 = Malloc(int, sub_prob.l);
+					sub_prob.iX1 = Malloc(int, sub_prob.l);
+					for(i = 0; i < l; i++) {
+						sub_prob.iX0[i] = prob->iX0[i];
+						sub_prob.iX1[i] = prob->iX1[i];
+					}
 				}
+//				if(prob->pairs == NULL) sub_prob.pairs = NULL;
+//				else {
+//					sub_prob.pairs = Malloc(int, sub_prob.l);
+//					for(i = 0; i < l; i++) sub_prob.pairs[i] = prob->pairs[i];
+//				}
 				sub_prob.x = NULL;
 				sub_prob.x0 = Malloc(feature_node *,sub_prob.l0);
 				for(k=0; k<sub_prob.l0; k++) {

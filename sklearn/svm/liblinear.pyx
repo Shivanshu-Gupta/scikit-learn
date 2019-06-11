@@ -87,7 +87,7 @@ def train_wrap_parabel(X0, X1, np.ndarray[np.float64_t, ndim=1, mode='c'] Y,
                bint is_sparse0, bint is_sparse1, int solver_type, double eps, double bias,
                double C, np.ndarray[np.float64_t, ndim=1] class_weight,
                int max_iter, unsigned random_seed, double epsilon, int concat,
-               pairs, double full0, np.ndarray[np.float64_t, ndim=1, mode='c'] sample_weight):
+               iX0, iX1, double full0, np.ndarray[np.float64_t, ndim=1, mode='c'] sample_weight):
 
     DEBUG = False
     cdef parameter *param
@@ -99,10 +99,19 @@ def train_wrap_parabel(X0, X1, np.ndarray[np.float64_t, ndim=1, mode='c'] Y,
     # cdef np.ndarray[np.uint64_t,   ndim=1, mode='c'] cpairs
     cdef char *cpairs
 
-    if pairs is None:
-        cpairs = NULL
+    # if pairs is None:
+    #     cpairs = NULL
+    # else:
+    #     cpairs = (<np.ndarray[np.int32_t,   ndim=1, mode='c']>pairs).data
+
+    if iX0 is None or iX1 is None:
+        ciX0 = NULL
+        ciX1 = NULL
     else:
-        cpairs = (<np.ndarray[np.uint64_t,   ndim=1, mode='c']>pairs).data
+        assert(iX0 is not None and iX1 is not None)
+        ciX0 = (<np.ndarray[np.int32_t,   ndim=1, mode='c']>iX0).data
+        ciX1 = (<np.ndarray[np.int32_t,   ndim=1, mode='c']>iX1).data
+
     if is_sparse0 and is_sparse1:
         # print("here")
         problem = csr_csr_set_problem_parabel(
@@ -119,7 +128,7 @@ def train_wrap_parabel(X0, X1, np.ndarray[np.float64_t, ndim=1, mode='c'] Y,
                 (<np.int32_t>Y.shape[0]), Y.data,
                 (<np.int32_t>X0.shape[1]),
                 (<np.int32_t>X1.shape[1]),
-                bias, concat, cpairs, full0, sample_weight.data)
+                bias, concat, ciX0, ciX1, full0, sample_weight.data)
     elif is_sparse0 and not is_sparse1:
         problem = csr_dense_set_problem_parabel(
                 (<np.ndarray[np.float64_t, ndim=1, mode='c']>X0.data).data,
@@ -131,7 +140,7 @@ def train_wrap_parabel(X0, X1, np.ndarray[np.float64_t, ndim=1, mode='c'] Y,
                 (<np.int32_t>Y.shape[0]), Y.data,
                 (<np.int32_t>X0.shape[1]),
                 (<np.ndarray[np.int32_t, ndim=2, mode='c']>X1).shape,
-                bias, concat, cpairs, full0, sample_weight.data)
+                bias, concat, ciX0, ciX1, full0, sample_weight.data)
     elif not is_sparse0 and is_sparse1:
             problem = dense_csr_set_problem_parabel(
                     (<np.ndarray[np.float64_t, ndim=2, mode='c']>X0).data,
@@ -143,7 +152,7 @@ def train_wrap_parabel(X0, X1, np.ndarray[np.float64_t, ndim=1, mode='c'] Y,
                     (<np.int32_t>Y.shape[0]), Y.data,
                     (<np.ndarray[np.int32_t, ndim=2, mode='c']>X0).shape,
                     (<np.int32_t>X1.shape[1]),
-                    bias, concat, cpairs, full0, sample_weight.data)
+                    bias, concat, ciX0, ciX1, full0, sample_weight.data)
     else:
         problem = dense_dense_set_problem_parabel(
                 (<np.ndarray[np.float64_t, ndim=2, mode='c']>X0).data,
@@ -151,7 +160,7 @@ def train_wrap_parabel(X0, X1, np.ndarray[np.float64_t, ndim=1, mode='c'] Y,
                 (<np.int32_t>Y.shape[0]), Y.data,
                 (<np.ndarray[np.int32_t, ndim=2, mode='c']>X0).shape,
                 (<np.ndarray[np.int32_t, ndim=2, mode='c']>X1).shape,
-                bias, concat, cpairs, full0, sample_weight.data)
+                bias, concat, ciX0, ciX1, full0, sample_weight.data)
 
     if DEBUG:
         print("problem created")

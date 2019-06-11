@@ -943,7 +943,7 @@ def _fit_liblinear(X, y, C, fit_intercept, intercept_scaling, class_weight,
 def _fit_liblinear_parabel(X0, X1, y, C, fit_intercept, intercept_scaling,
                            class_weight, penalty, dual, verbose, max_iter, tol,
                            random_state=None, multi_class='ovr', loss='logistic_regression',
-                           epsilon=0.1, concat=True, pairs=None, full0=False, sample_weight=None):
+                           epsilon=0.1, concat=True, iX0=None, iX1=None, full0=False, sample_weight=None):
     """Used by Logistic Regression (and CV) and LinearSVC/LinearSVR.
 
     Preprocessing is done in this function before supplying it to liblinear.
@@ -1081,8 +1081,12 @@ def _fit_liblinear_parabel(X0, X1, y, C, fit_intercept, intercept_scaling,
     # LibLinear wants targets as doubles, even for classification
     y_ind = np.asarray(y_ind, dtype=np.float64).ravel()
     y_ind = np.require(y_ind, requirements="W")
-    if pairs is not None:
-        pairs = pairs.astype(np.uint64).ravel()
+    # if pairs is not None:
+    #     pairs = pairs.astype(np.int32).ravel()
+    if iX0 is not None:
+        iX0 = iX0.astype(np.int32).ravel()
+    if iX1 is not None:
+        iX1 = iX1.astype(np.int32).ravel()
     if sample_weight is None:
         # if pairs is None:
         #     sample_weight = np.ones(X0.shape[0] * X1.shape[0])
@@ -1097,7 +1101,7 @@ def _fit_liblinear_parabel(X0, X1, y, C, fit_intercept, intercept_scaling,
     raw_coef_, n_iter_ = liblinear.train_wrap_parabel(
         X0, X1, y_ind, sp.isspmatrix(X0), sp.isspmatrix(X1), solver_type, tol, bias, C,
         class_weight_, max_iter, rnd.randint(np.iinfo('i').max),
-        epsilon, concat, pairs, full0, sample_weight)
+        epsilon, concat, iX0, iX1, full0, sample_weight)
     # Regarding rnd.randint(..) in the above signature:
     # seed for srand in range [0..INT_MAX); due to limitations in Numpy
     # on 32-bit platforms, we can't get to the UINT_MAX limit that

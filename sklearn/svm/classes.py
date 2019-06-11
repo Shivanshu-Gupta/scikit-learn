@@ -421,7 +421,7 @@ class LinearSVCParabel(BaseEstimator, LinearClassifierMixin,
         self.penalty = penalty
         self.loss = loss
 
-    def fit(self, X0, X1, y, concat=True, pairs=None, full0=False, sample_weight=None):
+    def fit(self, X0, X1, y, concat=True, iX0=None, iX1=None, full0=False, sample_weight=None):
         """Fit the model according to the given training data.
 
         Parameters
@@ -468,7 +468,7 @@ class LinearSVCParabel(BaseEstimator, LinearClassifierMixin,
             X0, X1, y, self.C, self.fit_intercept, self.intercept_scaling,
             self.class_weight, self.penalty, self.dual, self.verbose,
             self.max_iter, self.tol, self.random_state, self.multi_class,
-            self.loss, concat=concat, pairs=pairs, full0=full0, sample_weight=sample_weight)
+            self.loss, concat=concat, iX0=iX0, iX1=iX1, full0=full0, sample_weight=sample_weight)
 
         if self.multi_class == "crammer_singer" and len(self.classes_) == 2:
             self.coef_ = (self.coef_[1] - self.coef_[0]).reshape(1, -1)

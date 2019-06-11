@@ -200,7 +200,7 @@ void csr_set_feature_matrix(char *values, npy_intp *n_indices, char *indices,
 
 struct problem * dense_dense_set_problem_parabel(char *X0, char *X1,
         npy_intp n_samples, char *Y, npy_intp *dims0, npy_intp *dims1,
-        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+        double bias, int concat, char *iX0, char *iX1, double full0, char *sample_weight) {
     int DEBUG = 0;
     if(DEBUG) printf("dense X0, dense X1\n");
     struct problem *problem;
@@ -226,7 +226,9 @@ struct problem * dense_dense_set_problem_parabel(char *X0, char *X1,
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (uint64_t *) pairs;
+//    problem->pairs = (uint64_t *) pairs;
+    problem->iX0 = (int *) iX0;
+    problem->iX1 = (int *) iX1;
 
     problem->bias = bias;
     problem->concat = concat;
@@ -247,7 +249,7 @@ struct problem * csr_dense_set_problem_parabel(
         char *X1,
         npy_intp n_samples, char *Y,
         npy_intp n_features0, npy_intp *dims1,
-        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+        double bias, int concat, char *iX0, char *iX1, double full0, char *sample_weight) {
 
     int DEBUG = 0;
     if(DEBUG) printf("sparse X0, dense X1\n");
@@ -276,7 +278,9 @@ struct problem * csr_dense_set_problem_parabel(
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (uint64_t *) pairs;
+//    problem->pairs = (uint64_t *) pairs;
+    problem->iX0 = (int *) iX0;
+    problem->iX1 = (int *) iX1;
 
     problem->bias = bias;
     problem->concat = concat;
@@ -297,7 +301,7 @@ struct problem * dense_csr_set_problem_parabel(
         char *values1, npy_intp *n_indices1, char *indices1, npy_intp *n_indptr1, char *indptr1,
         npy_intp n_samples, char *Y,
         npy_intp *dims0, npy_intp n_features1,
-        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+        double bias, int concat, char *iX0, char *iX1, double full0, char *sample_weight) {
 
     int DEBUG = 0;
     if(DEBUG) printf("sparse X0, dense X1\n");
@@ -326,7 +330,9 @@ struct problem * dense_csr_set_problem_parabel(
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (uint64_t *) pairs;
+//    problem->pairs = (uint64_t *) pairs;
+    problem->iX0 = (int *) iX0;
+    problem->iX1 = (int *) iX1;
 
     problem->bias = bias;
     problem->concat = concat;
@@ -346,7 +352,7 @@ struct problem * csr_csr_set_problem_parabel (char *values0, npy_intp *n_indices
         char *indices0, npy_intp *n_indptr0, char *indptr0, char *values1,
         npy_intp *n_indices1, char *indices1, npy_intp *n_indptr1, char *indptr1,
         npy_intp n_samples, char *Y, npy_intp n_features0, npy_intp n_features1,
-        double bias, int concat, char *pairs, double full0, char *sample_weight) {
+        double bias, int concat, char *iX0, char *iX1, double full0, char *sample_weight) {
 
     int DEBUG = 0;
     if(DEBUG) printf("sparse X0, sparse X1\n");
@@ -374,7 +380,9 @@ struct problem * csr_csr_set_problem_parabel (char *values0, npy_intp *n_indices
     }
 
     problem->y = (double *) Y;
-    problem->pairs = (uint64_t *) pairs;
+//    problem->pairs = (uint64_t *) pairs;
+    problem->iX0 = (int *) iX0;
+    problem->iX1 = (int *) iX1;
 
     problem->bias = bias;
     problem->concat = concat;
