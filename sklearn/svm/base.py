@@ -1056,8 +1056,8 @@ def _fit_liblinear_parabel(X0, X1, y, C, fit_intercept, intercept_scaling,
     # LinearSVC breaks when intercept_scaling is <= 0
     bias = -1.0
     if fit_intercept:
-        if not concat:
-            raise Exception("Can't add intercept term when not taking concat.")
+        # if not concat:
+        #     raise Exception("Can't add intercept term when not taking concat.")
         if intercept_scaling <= 0:
             raise ValueError("Intercept scaling is %r but needs to be greater than 0."
                              " To disable fitting an intercept,"
@@ -1111,7 +1111,7 @@ def _fit_liblinear_parabel(X0, X1, y, C, fit_intercept, intercept_scaling,
         warnings.warn("Liblinear failed to converge, increase "
                       "the number of iterations.", ConvergenceWarning)
 
-    if fit_intercept:
+    if fit_intercept and concat:
         coef_ = raw_coef_[:, :-1]
         intercept_ = intercept_scaling * raw_coef_[:, -1]
     else:

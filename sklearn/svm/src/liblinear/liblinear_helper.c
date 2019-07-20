@@ -213,11 +213,12 @@ struct problem * dense_dense_set_problem_parabel(char *X0, char *X1,
         if(bias > 0) problem->n += 1;
     } else {
         problem->n = (int) dims0[1] * (int) dims1[1];
+        if(bias > 0) problem->n += (int) dims0[1] + (int) dims1[1] + 1;
         // TODO: incorporate bias explicitly inside.
     }
     problem->x = NULL;
     // bias added only to x1
-    set_feature_matrix(X0, dims0, 0, &(problem->x0), &(problem->l0), &(problem->n0));
+    set_feature_matrix(X0, dims0, bias, &(problem->x0), &(problem->l0), &(problem->n0));
     set_feature_matrix(X1, dims1, bias, &(problem->x1), &(problem->l1), &(problem->n1));
     if(DEBUG) {
         fprintf(stdout, "l=%d, l0=%d, l1=%d\n", problem->l, problem->l0, problem->l1);
@@ -263,12 +264,13 @@ struct problem * csr_dense_set_problem_parabel(
         if(bias > 0) problem->n += 1;
     } else {
         problem->n = (int) n_features0 * (int) dims1[1];
+        if(bias > 0) problem->n += (int) n_features0 + (int) dims1[1] + 1;
         // TODO: incorporate bias explicitly inside.
     }
 
     problem->x = NULL;
     // bias added only to x1
-    csr_set_feature_matrix(values0, n_indices0, indices0, n_indptr0, indptr0, 0, n_features0,
+    csr_set_feature_matrix(values0, n_indices0, indices0, n_indptr0, indptr0, bias, n_features0,
                            &(problem->x0), &(problem->l0), &(problem->n0));
     set_feature_matrix(X1, dims1, bias, &(problem->x1), &(problem->l1), &(problem->n1));
     if(DEBUG) {
@@ -315,12 +317,13 @@ struct problem * dense_csr_set_problem_parabel(
         if(bias > 0) problem->n += 1;
     } else {
         problem->n = (int) dims0[1] * (int) n_features1;
+        if(bias > 0) problem->n += (int) dims0[1] + (int) n_features1 + 1;
         // TODO: incorporate bias explicitly inside.
     }
 
     problem->x = NULL;
     // bias added only to x1
-    set_feature_matrix(X0, dims0, 0, &(problem->x0), &(problem->l0), &(problem->n0));
+    set_feature_matrix(X0, dims0, bias, &(problem->x0), &(problem->l0), &(problem->n0));
     csr_set_feature_matrix(values1, n_indices1, indices1, n_indptr1, indptr1, bias, n_features1,
                            &(problem->x1), &(problem->l1), &(problem->n1));
     if(DEBUG) {
@@ -365,11 +368,12 @@ struct problem * csr_csr_set_problem_parabel (char *values0, npy_intp *n_indices
         if(bias > 0) problem->n += 1;
     } else {
         problem->n = (int) n_features0 * (int) n_features1;
+        if(bias > 0) problem->n += (int) n_features0 + (int) n_features1 + 1;
         // TODO: incorporate bias explicitly inside.
     }
     problem->x = NULL;
     // bias feature added only to x1
-    csr_set_feature_matrix(values0, n_indices0, indices0, n_indptr0, indptr0, 0, n_features0,
+    csr_set_feature_matrix(values0, n_indices0, indices0, n_indptr0, indptr0, bias, n_features0,
                            &(problem->x0), &(problem->l0), &(problem->n0));
     csr_set_feature_matrix(values1, n_indices1, indices1, n_indptr1, indptr1, bias, n_features1,
                            &(problem->x1), &(problem->l1), &(problem->n1));

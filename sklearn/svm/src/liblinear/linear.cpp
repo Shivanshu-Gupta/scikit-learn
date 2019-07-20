@@ -897,10 +897,10 @@ static int solve_l2r_l1l2_svc(
 //				printf("%d/%d: %d\n", i, l, idx);
 ////            	printf("%d: ", prob->full0 == 1 ? idx : (idx / prob->l1));
 ////            	printf("%d: ", idx % prob->l0);
-//            	printf("%d: ", prob->iX0[idx);
+//            	printf("%d: ", prob->iX0[idx]);
 ////				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
 ////				x0i = prob->x0[idx % prob->l0];
-//				x0i = prob->x0[prob->iX0[idx];
+//				x0i = prob->x0[prob->iX0[idx]];
 //				while (x0i->index != -1) {
 //					printf("%f ", x0i->value);
 //					x0i++;
@@ -908,10 +908,10 @@ static int solve_l2r_l1l2_svc(
 //				printf("\n");
 ////				printf("%d: ", idx % prob->l1);
 ////				printf("%d: ", idx / prob->l0);
-//				printf("%d: ", prob->iX1[idx);
+//				printf("%d: ", prob->iX1[idx]);
 ////				x1i = prob->x1[idx % prob->l1];
 ////				x1i = prob->x1[idx / prob->l0];
-//				x1i = prob->x1[prob->iX1[idx];
+//				x1i = prob->x1[prob->iX1[idx]];
 //				while (x1i->index != -1) {
 //					printf("%f ", x1i->value);
 //					x1i++;
@@ -926,7 +926,6 @@ static int solve_l2r_l1l2_svc(
 
 //				x0i = prob->x0[prob->full0 == 1 ? idx : (idx / prob->l1)];
 //				x0i = prob->x0[idx % prob->l0];
-
 				x0i = prob->x0[prob->iX0[idx]];
 				while(x0i->index != -1) {
 //					x1i = prob->x1[idx % prob->l1];
